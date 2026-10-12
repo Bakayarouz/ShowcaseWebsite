@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Showcase</title>
+  <meta name="description" content="Feature showcase and changelog">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a href="#" class="brand"><span class="brand-block" aria-hidden="true"></span><span id="brand-name">Project</span></a>
+      <nav class="nav">
+        <a href="#features">Features</a>
+        <a href="#timeline">Timeline</a>
+        <a id="nav-source" href="#" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Feature showcase</p>
+      <h1 id="hero-title">Project</h1>
+      <p id="hero-tagline" class="tagline"></p>
+      <div class="hero-actions">
+        <a id="btn-download" class="btn btn-primary" href="#" target="_blank" rel="noopener">Download</a>
+        <a id="btn-source" class="btn" href="#" target="_blank" rel="noopener">View source</a>
+        <a id="btn-discord" class="btn" href="#" target="_blank" rel="noopener">Discord</a>
+      </div>
+      <dl class="stats">
+        <div><dt>Features</dt><dd id="stat-total">0</dd></div>
+        <div><dt>Latest version</dt><dd id="stat-version">–</dd></div>
+        <div><dt>Last update</dt><dd id="stat-updated">–</dd></div>
+      </dl>
+    </div>
+    <div class="ground" aria-hidden="true"></div>
+  </section>
+
+  <main>
+    <section id="features" class="wrap section">
+      <div class="section-head">
+        <h2>Features</h2>
+        <input id="search" type="search" placeholder="Search features…" aria-label="Search features">
+      </div>
+      <div id="filters" class="filters" role="toolbar" aria-label="Filter by category"></div>
+      <div id="grid" class="grid"></div>
+      <p id="empty" class="empty" hidden>No features match your search.</p>
+    </section>
+
+    <section id="timeline" class="wrap section">
+      <div class="section-head"><h2>Timeline</h2></div>
+      <ol id="timeline-list" class="timeline"></ol>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <p id="footer-text"></p>
+    </div>
+  </footer>
+
+  <dialog id="modal" class="modal">
+    <button class="modal-close" aria-label="Close">✕</button>
+    <div id="modal-body"></div>
+  </dialog>
+
+  <script src="features.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
