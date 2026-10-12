@@ -61,7 +61,9 @@ const FEATURES = [
       "Starter weapon picker for first-time players",
       "All text is configurable with MiniMessage and ready for resource-pack glyphs"
     ],
-    image: "images/realm-menu.jpg",
+    image: "",
+    video: "images/realm-menu.mp4",
+    poster: "images/realm-menu.jpg",
     icon: "🏰"
   },
   {
