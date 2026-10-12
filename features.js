@@ -24,7 +24,7 @@
 
 const SITE = {
   name: "My Minecraft Project",
-  tagline: "A survival-friendly mod that adds new worlds, mobs and mechanics.",
+  tagline: "Plugins and features I've built for Minecraft.",
   // Buttons in the header & hero. Remove any you don't need.
   links: {
     download: "", // e.g. your Modrinth/CurseForge/GitHub releases page
@@ -36,68 +36,69 @@ const SITE = {
 
 const FEATURES = [
   {
-    title: "Crystal Caverns Biome",
-    date: "2026-10-05",
-    category: "World",
-    version: "1.3.0",
+    title: "Realm Menu",
+    date: "2026-10-12",
+    category: "Menus",
+    version: "",
     status: "released",
-    summary: "A new underground biome filled with glowing amethyst pillars and rare ore veins.",
-    details: [
-      "Generates below Y=0 in mountain regions",
-      "New light-emitting Crystal Lantern block",
-      "Custom ambient sounds"
-    ],
-    image: "",
-    icon: "💎"
-  },
-  {
-    title: "Ember Golem",
-    date: "2026-09-21",
-    category: "Mobs",
-    version: "1.2.0",
-    status: "released",
-    summary: "A fiery guardian that patrols Nether fortresses and drops Ember Cores.",
-    details: [
-      "Immune to fire and lava",
-      "Ember Cores craft into heat-resistant armor"
-    ],
-    image: "",
-    icon: "🔥"
-  },
-  {
-    title: "Sprint-Jump Stamina",
-    date: "2026-09-02",
-    category: "Gameplay",
-    version: "1.1.0",
-    status: "released",
-    summary: "An optional stamina bar that makes long-distance travel a little more strategic.",
-    details: [
-      "Toggle in config",
-      "Stamina regenerates faster while standing still"
-    ],
-    image: "",
-    icon: "⚡"
-  },
-  {
-    title: "Copper Pipes",
-    date: "2026-08-14",
-    category: "Blocks",
-    version: "1.0.0",
-    status: "released",
-    summary: "Move items between containers with oxidizing copper pipes — waxed pipes keep their speed.",
+    summary: "A menu for browsing and jumping between realms.",
     details: [],
     image: "",
-    icon: "🧱"
+    icon: "🌍"
   },
   {
-    title: "Sky Islands Dimension",
-    date: "2026-11-01",
-    category: "World",
-    version: "1.4.0",
-    status: "beta",
-    summary: "Floating islands above the clouds, reachable through a new portal frame.",
-    details: ["Currently in beta testing — feedback welcome!"],
+    title: "DungeonTimer",
+    date: "2026-10-12",
+    category: "Gameplay",
+    version: "",
+    status: "released",
+    summary: "Times dungeon runs so players can track how long each run takes.",
+    details: [],
     image: "",
-    icon: "☁️"
+    icon: "⏱️"
+  },
+  {
+    title: "ChatToolTip Plugin",
+    date: "2026-10-12",
+    category: "Chat",
+    version: "",
+    status: "released",
+    summary: "Adds hoverable tooltips to chat messages.",
+    details: [],
+    image: "",
+    icon: "💬"
+  },
+  {
+    title: "Player Aura",
+    date: "2026-10-12",
+    category: "Cosmetics",
+    version: "",
+    status: "released",
+    summary: "Visual aura effects that surround players.",
+    details: [],
+    image: "",
+    icon: "✨"
+  },
+  {
+    title: "Multi Page Lores",
+    date: "2026-10-12",
+    category: "Items",
+    version: "",
+    status: "released",
+    summary: "Lets item lore span multiple pages instead of one long tooltip.",
+    details: [],
+    image: "",
+    icon: "📜"
+  },
+  {
+    title: "Potion Display",
+    date: "2026-10-12",
+    category: "UI",
+    version: "",
+    status: "released",
+    summary: "Shows players their active potion effects at a glance.",
+    details: [],
+    image: "",
+    icon: "🧪"
   }
 ];
