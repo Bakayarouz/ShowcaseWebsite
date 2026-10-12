@@ -16,20 +16,19 @@
   $("#footer-text").textContent = `© ${new Date().getFullYear()} ${SITE.name}. ${SITE.footer || ""}`;
 
   /* ---------- Player skin ---------- */
+  // Both images stay hidden until they've actually loaded, so a slow or
+  // failed skin service never leaves an empty box on the page.
   const skinId = SITE.player && (SITE.player.uuid || SITE.player.name);
-  const skinFig = document.querySelector(".hero-skin");
   if (skinId) {
-    const head = $("#brand-head"), body = $("#hero-skin");
-    head.src = `https://mc-heads.net/avatar/${encodeURIComponent(skinId)}/64`;
+    const id = encodeURIComponent(skinId);
+    const head = $("#brand-head"), body = $("#hero-skin"), fig = $(".hero-skin");
+    head.onload = () => { head.hidden = false; };
     head.alt = `${SITE.player.name}'s head`;
-    head.onerror = () => head.remove();
-    body.src = `https://mc-heads.net/body/${encodeURIComponent(skinId)}/360`;
+    head.src = `https://mc-heads.net/avatar/${id}/64`;
+    body.onload = () => { fig.hidden = false; };
     body.alt = `${SITE.player.name}'s Minecraft skin`;
-    body.onerror = () => skinFig.classList.add("is-hidden");
+    body.src = `https://mc-heads.net/body/${id}/360`;
     $("#hero-skin-name").textContent = SITE.player.name;
-  } else {
-    $("#brand-head").remove();
-    skinFig.classList.add("is-hidden");
   }
 
   const setLink = (el, url) => { if (url) el.href = url; else el.remove(); };

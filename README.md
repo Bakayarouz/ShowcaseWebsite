@@ -39,7 +39,7 @@ Open `features.js` and add an entry to the `FEATURES` list:
 },
 ```
 
-Commit and push — the site updates automatically. New categories show up as filter buttons on their own, and the timeline groups features by date.
+Commit and push — the site updates automatically (GitHub caches files for up to 10 minutes, so hard-refresh with Ctrl+Shift+R if you don't see the change). New categories show up as filter buttons on their own, and the timeline groups features by date.
 
 ## Preview locally
 

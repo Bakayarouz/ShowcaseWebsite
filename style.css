@@ -75,7 +75,7 @@ a { color: inherit; }
   font-family: var(--pixel); font-size: 11px; color: #fff;
   background: rgba(0,0,0,.45); padding: 6px 10px;
 }
-.hero-skin.is-hidden { display: none; }
+.hero-skin[hidden], .brand-head[hidden] { display: none; }
 @keyframes skin-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 @media (prefers-reduced-motion: reduce) { .hero-skin img { animation: none; } }
 .eyebrow { font-family: var(--pixel); font-size: 10px; color: var(--grass); letter-spacing: 1px; text-transform: uppercase; margin: 0 0 16px; }
