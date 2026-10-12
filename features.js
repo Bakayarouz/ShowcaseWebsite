@@ -116,8 +116,8 @@ const FEATURES = [
       "PlaceholderAPI support"
     ],
     image: "",
-    video: "images/player-aura.mp4",
-    poster: "images/player-aura-poster.jpg",
+    video: "images/player-aura.mp4?v=2",
+    poster: "images/player-aura-poster.jpg?v=2",
     icon: "✨"
   },
   {
