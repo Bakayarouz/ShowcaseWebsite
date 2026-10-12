@@ -18,6 +18,11 @@
      details     (optional)  Array of bullet points
      image       (optional)  Path like "images/my-feature.png"
                              or a full URL. Leave "" for none.
+     video       (optional)  Path to an .mp4, e.g. "images/my-feature.mp4".
+                             Plays in the pop-up with controls.
+     poster      (optional)  Still image shown on the card for a video
+     loop        (optional)  true = short clip that plays silently on a
+                             loop right on the card (for 1–5 second clips)
      icon        (optional)  An emoji shown when there's no image
    ========================================================= */
 
@@ -30,10 +35,9 @@ const SITE = {
   },
   tagline: "Custom Paper plugins for a medieval fantasy Minecraft server: menus, chat, dungeons, cosmetics and more.",
   platform: "Paper 1.21",
-  // Buttons in the header & hero. Leave a link "" to hide its button.
+  // Buttons in the hero. Leave a link "" to hide its button.
   links: {
-    download: "", // e.g. your Modrinth/CurseForge/GitHub releases page
-    source: "https://github.com/Bakayarouz",
+    download: "", // e.g. your Modrinth/CurseForge store page
     discord: ""
   },
   footer: "Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft."
@@ -56,7 +60,7 @@ const FEATURES = [
       "Starter weapon picker for first-time players",
       "All text is configurable with MiniMessage and ready for resource-pack glyphs"
     ],
-    image: "",
+    image: "images/realm-menu.jpg",
     icon: "🏰"
   },
   {
@@ -75,7 +79,7 @@ const FEATURES = [
       "/msg, /reply, /ignore, offline /mail, /nick, /seen and /report",
       "Mutes, warns, kicks and bans with durations, stored in SQLite"
     ],
-    image: "",
+    image: "images/chat-head-tooltip.png",
     icon: "💬"
   },
   {
@@ -112,6 +116,8 @@ const FEATURES = [
       "PlaceholderAPI support"
     ],
     image: "",
+    video: "images/player-aura.mp4",
+    poster: "images/player-aura-poster.jpg",
     icon: "✨"
   },
   {
@@ -128,6 +134,9 @@ const FEATURES = [
       "Avoids conflicts with other plugins' menus"
     ],
     image: "",
+    video: "images/multi-page-lore.mp4",
+    poster: "images/multi-page-lore-poster.jpg",
+    loop: true,
     icon: "📜"
   },
   {
@@ -136,13 +145,13 @@ const FEATURES = [
     category: "UI",
     version: "1.0.0",
     status: "released",
-    summary: "Shows a player's active potion effects as custom icons from your resource pack, sorted and ready to drop into any HUD.",
+    summary: "Shows a player's active potion effects as custom resource-pack icons, sorted and wrapped into neat rows — above their name or in any HUD.",
     details: [
       "Every effect maps to its own custom glyph and colour",
       "Wraps onto new lines after a set number of effects",
       "Exposed through PlaceholderAPI for scoreboards, action bars and holograms"
     ],
-    image: "",
+    image: "images/potion-display.png",
     icon: "🧪"
   }
 ];

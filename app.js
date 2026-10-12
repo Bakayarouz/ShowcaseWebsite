@@ -33,9 +33,9 @@
 
   const setLink = (el, url) => { if (url) el.href = url; else el.remove(); };
   setLink($("#btn-download"), SITE.links?.download);
-  setLink($("#btn-source"), SITE.links?.source);
-  setLink($("#nav-source"), SITE.links?.source);
   setLink($("#btn-discord"), SITE.links?.discord);
+  const actions = $(".hero-actions");
+  if (!actions.children.length) actions.remove();
 
   /* ---------- Stats ---------- */
   const released = features.filter((f) => (f.status || "released") === "released");
@@ -65,9 +65,25 @@
   $("#search").addEventListener("input", (e) => { query = e.target.value.trim().toLowerCase(); render(); });
 
   /* ---------- Cards ---------- */
-  const media = (f) => f.image
-    ? `<div class="card-media"><img src="${esc(f.image)}" alt="${esc(f.title)}" loading="lazy"></div>`
-    : `<div class="card-media" aria-hidden="true">${esc(f.icon || "⛏️")}</div>`;
+  // inModal: the pop-up plays videos with controls; cards show a still
+  // (or a silent looping clip when the feature sets loop: true).
+  const media = (f, inModal) => {
+    if (f.video) {
+      const poster = f.poster ? ` poster="${esc(f.poster)}"` : "";
+      if (inModal) {
+        const autoLoop = f.loop ? " autoplay muted loop" : " autoplay";
+        return `<div class="card-media"><video src="${esc(f.video)}"${poster} controls playsinline${autoLoop} preload="metadata"></video></div>`;
+      }
+      if (f.loop) {
+        return `<div class="card-media"><video src="${esc(f.video)}"${poster} autoplay muted loop playsinline preload="metadata" aria-label="${esc(f.title)}"></video></div>`;
+      }
+      const still = f.poster || f.image;
+      return `<div class="card-media has-play">${still ? `<img src="${esc(still)}" alt="${esc(f.title)}" loading="lazy">` : esc(f.icon || "⛏️")}<span class="play-badge" aria-hidden="true">▶</span></div>`;
+    }
+    return f.image
+      ? `<div class="card-media"><img src="${esc(f.image)}" alt="${esc(f.title)}" loading="lazy"></div>`
+      : `<div class="card-media" aria-hidden="true">${esc(f.icon || "⛏️")}</div>`;
+  };
 
   const meta = (f) => {
     const status = f.status || "released";
@@ -124,7 +140,7 @@
   const modal = $("#modal");
   function openModal(f) {
     $("#modal-body").innerHTML = `
-      ${media(f)}
+      ${media(f, true)}
       <div class="modal-content">
         ${meta(f)}
         <h3>${esc(f.title)}</h3>
@@ -135,6 +151,8 @@
     else modal.setAttribute("open", "");
   }
   const closeModal = () => (modal.close ? modal.close() : modal.removeAttribute("open"));
+  // Stop any video when the pop-up closes (including via Esc).
+  modal.addEventListener("close", () => { $("#modal-body").innerHTML = ""; });
   modal.querySelector(".modal-close").addEventListener("click", closeModal);
   modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
 
