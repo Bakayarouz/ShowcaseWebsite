@@ -22,7 +22,12 @@
    ========================================================= */
 
 const SITE = {
-  name: "Bakayarouz Plugins",
+  name: "Kudosaki's Plugins",
+  // Your Minecraft skin, shown in the header. uuid keeps it working if you rename.
+  player: {
+    name: "Kudosaki",
+    uuid: "d943f52c25c84a4a9215ce2981413711"
+  },
   tagline: "Custom Paper plugins for a medieval fantasy Minecraft server: menus, chat, dungeons, cosmetics and more.",
   platform: "Paper 1.21",
   // Buttons in the header & hero. Leave a link "" to hide its button.

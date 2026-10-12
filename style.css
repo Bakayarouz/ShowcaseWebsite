@@ -42,6 +42,7 @@ a { color: inherit; }
 }
 .topbar-inner { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 16px; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-family: var(--pixel); font-size: 12px; }
+.brand-head { width: 26px; height: 26px; image-rendering: pixelated; border: 2px solid #000; background: var(--bg-2); }
 .brand-block {
   width: 22px; height: 22px; flex-shrink: 0;
   background: linear-gradient(var(--grass) 0 35%, var(--dirt) 35% 100%);
@@ -60,6 +61,23 @@ a { color: inherit; }
     linear-gradient(#1b2a3a, var(--bg));
   overflow: hidden;
 }
+.hero-inner { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; }
+.hero-text { flex: 1; min-width: 0; }
+.hero-skin { margin: 0 0 -66px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
+.hero-skin img {
+  width: 180px; height: auto; image-rendering: pixelated;
+  filter: drop-shadow(8px 10px 0 rgba(0,0,0,.35));
+  animation: skin-bob 3.2s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+.hero-skin figcaption {
+  order: -1; margin-bottom: 10px;
+  font-family: var(--pixel); font-size: 11px; color: #fff;
+  background: rgba(0,0,0,.45); padding: 6px 10px;
+}
+.hero-skin.is-hidden { display: none; }
+@keyframes skin-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@media (prefers-reduced-motion: reduce) { .hero-skin img { animation: none; } }
 .eyebrow { font-family: var(--pixel); font-size: 10px; color: var(--grass); letter-spacing: 1px; text-transform: uppercase; margin: 0 0 16px; }
 .hero h1 {
   font-family: var(--pixel);
@@ -203,6 +221,9 @@ a { color: inherit; }
   .nav { gap: 14px; }
   .nav a { font-size: 13px; }
   .hero { padding: 48px 0 96px; }
+  .hero-inner { flex-direction: column-reverse; align-items: flex-start; }
+  .hero-skin { margin: 0; align-self: center; }
+  .hero-skin img { width: 120px; }
   .tagline { font-size: 16px; }
   #search { width: 100%; }
 }
