@@ -38,10 +38,9 @@
   if (!actions.children.length) actions.remove();
 
   /* ---------- Stats ---------- */
-  const released = features.filter((f) => (f.status || "released") === "released");
-  $("#stat-total").textContent = released.length;
+  $("#stat-total").textContent = features.length;
   $("#stat-version").textContent = SITE.platform || "–";
-  $("#stat-updated").textContent = released[0] ? fmtDate(released[0].date) : "–";
+  $("#stat-updated").textContent = features[0] ? fmtDate(features[0].date) : "–";
 
   /* ---------- Filters ---------- */
   const categories = ["All", ...new Set(features.map((f) => f.category).filter(Boolean))];
@@ -85,10 +84,11 @@
       : `<div class="card-media" aria-hidden="true">${esc(f.icon || "⛏️")}</div>`;
   };
 
+  const STATUS_LABELS = { development: "Under Development", released: "Released", beta: "Beta", planned: "Planned" };
   const meta = (f) => {
     const status = f.status || "released";
     return `<div class="card-meta">
-      <span class="tag status-${esc(status)}">${esc(status)}</span>
+      <span class="tag status-${esc(status)}">${esc(STATUS_LABELS[status] || status)}</span>
       ${f.category ? `<span class="tag">${esc(f.category)}</span>` : ""}
       ${f.version ? `<span>v${esc(f.version)}</span>` : ""}
       <span>· ${esc(fmtDate(f.date))}</span>

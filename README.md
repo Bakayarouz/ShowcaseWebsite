@@ -31,7 +31,7 @@ Open `features.js` and add an entry to the `FEATURES` list:
   date: "2026-10-12",
   category: "Items",
   version: "1.3.1",
-  status: "released",          // released | beta | planned
+  status: "development",       // development | released | beta | planned
   summary: "A boat that floats on lava.",
   details: ["Crafted from a boat + netherite ingot", "Immune to fire"],
   image: "images/netherite-boat.png",   // or "" for no image

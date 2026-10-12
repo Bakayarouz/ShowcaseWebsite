@@ -13,7 +13,8 @@
                              New categories become filter buttons
                              automatically.
      version     (optional)  e.g. "1.2.0"
-     status      (optional)  "released" | "beta" | "planned"
+     status      (optional)  "development" (Under Development) |
+                             "released" | "beta" | "planned"
      summary     (required)  One or two sentences
      details     (optional)  Array of bullet points
      image       (optional)  Path like "images/my-feature.png"
@@ -49,7 +50,7 @@ const FEATURES = [
     date: "2026-10-12",
     category: "Menus",
     version: "1.0.0",
-    status: "released",
+    status: "development",
     summary: "A cinematic main menu that greets players when they join, with a locked camera, a sliding logo and an \"Entering the realm…\" transition.",
     details: [
       "Welcome / welcome-back intro titles over a black screen",
@@ -68,7 +69,7 @@ const FEATURES = [
     date: "2026-10-12",
     category: "Chat",
     version: "2.0.0",
-    status: "released",
+    status: "development",
     summary: "A full chat system built around a player-head tooltip on every name, plus channels, filters, social commands and staff moderation.",
     details: [
       "Hover a name in chat to see the player's head, title and lore",
@@ -87,7 +88,7 @@ const FEATURES = [
     date: "2026-10-11",
     category: "Gameplay",
     version: "2.7",
-    status: "released",
+    status: "development",
     summary: "Times dungeon runs across multiple dungeons and keeps each player's best and last clear times, even if they disconnect mid-run.",
     details: [
       "Several parties can run the same dungeon at once, tracked by group",
@@ -105,7 +106,7 @@ const FEATURES = [
     date: "2026-10-11",
     category: "Cosmetics",
     version: "1.0.0",
-    status: "released",
+    status: "development",
     summary: "Cosmetic auras that float around players, built on 1.21 display entities and custom item models.",
     details: [
       "Static auras (like a halo) or animated multi-frame auras",
@@ -125,7 +126,7 @@ const FEATURES = [
     date: "2026-09-22",
     category: "Items",
     version: "1.0.0",
-    status: "released",
+    status: "development",
     summary: "Splits long item lore into pages that players flip through, instead of one giant tooltip.",
     details: [
       "Add ---page--- to an item's lore to start a new page",
@@ -144,7 +145,7 @@ const FEATURES = [
     date: "2026-09-19",
     category: "UI",
     version: "1.0.0",
-    status: "released",
+    status: "development",
     summary: "Shows a player's active potion effects as custom resource-pack icons, sorted and wrapped into neat rows — above their name or in any HUD.",
     details: [
       "Every effect maps to its own custom glyph and colour",

@@ -185,6 +185,7 @@ a { color: inherit; }
 .tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 3px; background: rgba(255,255,255,.08); color: var(--text); }
 .status-released { background: rgba(94,168,58,.2); color: #8fd36a; }
 .status-beta { background: rgba(242,201,76,.18); color: var(--gold); }
+.status-development { background: rgba(230,140,50,.18); color: #f0a35a; }
 .status-planned { background: rgba(79,209,197,.15); color: var(--diamond); }
 
 .empty { color: var(--muted); text-align: center; padding: 40px 0; }
