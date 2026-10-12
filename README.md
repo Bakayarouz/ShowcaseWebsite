@@ -39,7 +39,7 @@ Open `features.js` and add an entry to the `FEATURES` list:
 },
 ```
 
-Commit and push — the site updates automatically. New categories show up as filter buttons on their own, and the timeline groups features by version.
+Commit and push — the site updates automatically. New categories show up as filter buttons on their own, and the timeline groups features by date.
 
 ## Preview locally
 

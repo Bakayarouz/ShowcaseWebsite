@@ -24,8 +24,7 @@
   /* ---------- Stats ---------- */
   const released = features.filter((f) => (f.status || "released") === "released");
   $("#stat-total").textContent = released.length;
-  const latest = released.find((f) => f.version);
-  $("#stat-version").textContent = latest ? latest.version : "–";
+  $("#stat-version").textContent = SITE.platform || "–";
   $("#stat-updated").textContent = released[0] ? fmtDate(released[0].date) : "–";
 
   /* ---------- Filters ---------- */
@@ -87,17 +86,17 @@
     if (card) openModal(features[+card.dataset.idx]);
   });
 
-  /* ---------- Timeline (grouped by version) ---------- */
+  /* ---------- Timeline (grouped by date) ---------- */
   const groups = new Map();
   features.forEach((f, i) => {
-    const key = f.version ? `v${f.version}` : fmtDate(f.date);
+    const key = f.date;
     if (!groups.has(key)) groups.set(key, { date: f.date, items: [] });
     groups.get(key).items.push(i);
   });
   $("#timeline-list").innerHTML = [...groups].map(([label, g]) => `
     <li>
-      <time datetime="${esc(g.date)}">${esc(fmtDate(g.date))} · ${esc(label)}</time>
-      ${g.items.map((i) => `<span class="tl-title"><button data-idx="${i}">${esc(features[i].title)}</button></span>
+      <time datetime="${esc(g.date)}">${esc(fmtDate(g.date))}</time>
+      ${g.items.map((i) => `<span class="tl-title"><button data-idx="${i}">${esc(features[i].title)}${features[i].version ? ` v${esc(features[i].version)}` : ""}</button></span>
         <span class="tl-sub">${esc(features[i].summary)}</span>`).join("")}
     </li>`).join("");
   $("#timeline-list").addEventListener("click", (e) => {
