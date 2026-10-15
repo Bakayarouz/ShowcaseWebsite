@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vaelithra - Custom Java Minecraft MMO (Not Quite RPG)</title>
+    <meta name="description" content="Vaelithra is a custom PvE Minecraft Java MMO in development: instanced lairs for every party, required minibosses, boss portals, gem sockets, guilds and dungeon leaderboards.">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
@@ -12,26 +13,28 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <script>
+        // Palette follows the in-game logo: bone white + old gold, with soul blue for the deep and ember red for danger.
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         void: {
-                            950: '#06050A',
-                            900: '#0D0B14',
-                            800: '#151221',
-                            700: '#1F1B30',
-                            600: '#2D2845',
+                            950: '#07060A',
+                            900: '#0E0C12',
+                            800: '#16131B',
+                            700: '#211D27',
+                            600: '#2E2935',
                         },
                         amber: {
-                            gold: '#E5B842',
-                            glow: '#FFD700',
-                            soft: '#F3DB94',
+                            gold: '#D9A441',
+                            glow: '#F0C060',
+                            soft: '#EFE6D2',
                         },
-                        ember: '#FF5533',
-                        mythic: '#A335EE',
+                        bone: '#EFE6D2',
+                        soul: '#5FB6C9',
+                        ember: '#B5452F',
                         emerald: {
                             glow: '#10B981',
                         }
@@ -47,22 +50,22 @@
     </script>
     <style>
         body {
-            background-color: #06050A;
+            background-color: #07060A;
             color: #E2E8F0;
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
         }
 
         .glass-panel {
-            background: rgba(13, 11, 20, 0.82);
+            background: rgba(14, 12, 18, 0.82);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(229, 184, 66, 0.12);
+            border: 1px solid rgba(217, 164, 65, 0.12);
         }
 
         .glass-panel-hover:hover {
-            border-color: rgba(229, 184, 66, 0.35);
-            box-shadow: 0 0 30px rgba(229, 184, 66, 0.08);
+            border-color: rgba(217, 164, 65, 0.35);
+            box-shadow: 0 0 30px rgba(217, 164, 65, 0.08);
             transform: translateY(-2px);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -71,19 +74,19 @@
             width: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #06050A;
+            background: #07060A;
         }
         ::-webkit-scrollbar-thumb {
-            background: #1F1B30;
+            background: #211D27;
             border-radius: 4px;
-            border: 1px solid rgba(229, 184, 66, 0.2);
+            border: 1px solid rgba(217, 164, 65, 0.2);
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #E5B842;
+            background: #D9A441;
         }
 
         .text-glow-amber {
-            text-shadow: 0 0 16px rgba(229, 184, 66, 0.45);
+            text-shadow: 0 0 16px rgba(217, 164, 65, 0.45);
         }
 
         #particleCanvas {
@@ -96,27 +99,34 @@
             z-index: 0;
         }
 
-        .tab-btn.active {
-            background: rgba(229, 184, 66, 0.15);
-            border-color: #E5B842;
-            color: #E5B842;
+        .tab-btn.active,
+        .seg-btn.active {
+            background: rgba(217, 164, 65, 0.15);
+            border-color: #D9A441;
+            color: #D9A441;
+        }
+
+        .dev-filter-btn.active {
+            background: #D9A441;
+            color: #07060A;
+            font-weight: 700;
         }
     </style>
 </head>
 <body class="relative selection:bg-amber-gold selection:text-void-950">
 
-    <!-- Interactive Embers Canvas -->
+    <!-- Rising embers and souls -->
     <canvas id="particleCanvas"></canvas>
 
     <!-- TOAST NOTIFICATION FOR COPY IP -->
-    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 ease-out pointer-events-none">
-        <div class="glass-panel px-5 py-3 rounded-xl border border-emerald-500/50 flex items-center space-x-3 shadow-2xl bg-void-900">
-            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 ease-out pointer-events-none" role="status" aria-live="polite">
+        <div class="glass-panel px-5 py-3 rounded-xl border border-amber-gold/50 flex items-center space-x-3 shadow-2xl bg-void-900">
+            <div class="w-8 h-8 rounded-lg bg-amber-gold/20 text-amber-gold flex items-center justify-center">
                 <i class="fa-solid fa-check text-sm"></i>
             </div>
             <div>
-                <p class="text-xs font-bold text-white">Server IP Copied!</p>
-                <p class="text-[11px] text-slate-400 font-mono">play.vaelithra.net</p>
+                <p class="text-xs font-bold text-white" id="toastTitle">Server IP Copied!</p>
+                <p class="text-[11px] text-slate-400 font-mono" data-server-ip>play.vaelithra.net</p>
             </div>
         </div>
     </div>
@@ -124,49 +134,46 @@
     <!-- HEADER / NAVIGATION -->
     <header class="sticky top-0 z-40 w-full glass-panel border-b border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            
-            <!-- Brand & Tech Badge -->
+
+            <!-- Brand & Status Badge -->
             <div class="flex items-center space-x-4">
                 <a href="#" class="flex items-center space-x-3 group">
-                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-gold/20 via-ember/20 to-mythic/20 border border-amber-gold/40 flex items-center justify-center group-hover:border-amber-gold transition-colors">
-                        <i class="fa-solid fa-cube text-amber-gold text-lg group-hover:scale-110 transition-transform"></i>
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-gold/20 via-ember/20 to-soul/20 border border-amber-gold/40 flex items-center justify-center group-hover:border-amber-gold transition-colors">
+                        <i class="fa-solid fa-dungeon text-amber-gold text-lg group-hover:scale-110 transition-transform"></i>
                     </div>
                     <div>
-                        <span class="font-cinzel text-xl font-black tracking-widest text-white group-hover:text-amber-soft transition-colors block leading-none">VAELITHRA</span>
-                        <span class="text-[10px] font-mono tracking-wider text-amber-gold/80 uppercase">Minecraft Java Server</span>
+                        <span class="font-cinzel text-xl font-black tracking-widest text-bone group-hover:text-amber-gold transition-colors block leading-none">VAELITHRA</span>
+                        <span class="text-[10px] font-mono tracking-wider text-amber-gold/80 uppercase">Lairs &middot; Dungeons &middot; Bosses</span>
                     </div>
                 </a>
 
-                <!-- Java Status Badge -->
                 <div class="hidden lg:flex items-center space-x-2 px-3 py-1 rounded-full bg-void-800/90 border border-amber-gold/30 text-[11px] text-slate-300 font-mono">
                     <span class="relative flex h-2 w-2">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-gold opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-gold"></span>
                     </span>
-                    <span>In Active Development / Private Test</span>
+                    <span>In Development &middot; Private Testing</span>
                 </div>
             </div>
 
             <!-- Navigation Links -->
             <nav class="hidden md:flex items-center space-x-8 text-xs uppercase tracking-wider font-semibold text-slate-300">
-                <a href="#philosophy" class="hover:text-amber-gold transition-colors">Design Pillars</a>
+                <a href="#philosophy" class="hover:text-amber-gold transition-colors">Pillars</a>
                 <a href="#leaderboards" class="hover:text-amber-gold transition-colors">Leaderboards</a>
                 <a href="#roadmap" class="hover:text-amber-gold transition-colors">Roadmap</a>
                 <a href="#devlogs" class="hover:text-amber-gold transition-colors">Devlogs</a>
                 <a href="#faq" class="hover:text-amber-gold transition-colors">FAQ</a>
             </nav>
 
-            <!-- Actions Header -->
             <div class="hidden sm:flex items-center space-x-3">
                 <button onclick="copyServerIP()" class="px-4 py-2 rounded-lg text-xs font-mono font-semibold bg-void-800 hover:bg-void-700 text-slate-200 border border-amber-gold/30 hover:border-amber-gold transition-all flex items-center space-x-2 group">
                     <i class="fa-solid fa-terminal text-amber-gold text-xs"></i>
-                    <span>play.vaelithra.net</span>
+                    <span data-server-ip>play.vaelithra.net</span>
                     <i class="fa-solid fa-copy text-slate-500 group-hover:text-amber-gold text-[10px]"></i>
                 </button>
             </div>
 
-            <!-- Mobile Menu Btn -->
-            <button id="mobileMenuBtn" class="md:hidden text-slate-300 hover:text-white p-2">
+            <button id="mobileMenuBtn" class="md:hidden text-slate-300 hover:text-white p-2" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
                 <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </div>
@@ -175,16 +182,16 @@
         <div id="mobileMenu" class="hidden md:hidden border-t border-slate-800 bg-void-950/95 backdrop-blur-xl px-4 pt-4 pb-6 space-y-3">
             <div class="flex items-center space-x-2 px-3 py-1.5 rounded-md bg-void-800 border border-amber-gold/30 text-xs text-amber-gold font-mono w-fit mb-2">
                 <span class="h-2 w-2 rounded-full bg-amber-gold animate-pulse"></span>
-                <span>In Active Development / Private Test</span>
+                <span>In Development &middot; Private Testing</span>
             </div>
-            <a href="#philosophy" class="block py-2 text-slate-300 hover:text-amber-gold text-sm font-medium">Design Pillars</a>
+            <a href="#philosophy" class="block py-2 text-slate-300 hover:text-amber-gold text-sm font-medium">Pillars</a>
             <a href="#leaderboards" class="block py-2 text-slate-300 hover:text-amber-gold text-sm font-medium">Leaderboards</a>
             <a href="#roadmap" class="block py-2 text-slate-300 hover:text-amber-gold text-sm font-medium">Roadmap</a>
             <a href="#devlogs" class="block py-2 text-slate-300 hover:text-amber-gold text-sm font-medium">Devlogs</a>
             <a href="#faq" class="block py-2 text-slate-300 hover:text-amber-gold text-sm font-medium">FAQ</a>
             <div class="pt-3">
                 <button onclick="copyServerIP()" class="w-full text-center py-2.5 rounded-lg bg-void-800 text-slate-200 border border-amber-gold/30 text-xs font-mono">
-                    IP: play.vaelithra.net (Click to Copy)
+                    IP: <span data-server-ip>play.vaelithra.net</span> (Click to Copy)
                 </button>
             </div>
         </div>
@@ -193,116 +200,121 @@
     <!-- HERO SECTION -->
     <section class="relative z-10 pt-20 pb-24 md:pt-28 md:pb-32 overflow-hidden">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-            
-            <!-- Hero Pill Badge -->
+
             <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-void-800/90 border border-amber-gold/30 text-xs font-mono text-amber-soft mb-8">
-                <i class="fa-solid fa-cube text-amber-gold text-xs"></i>
+                <i class="fa-solid fa-dungeon text-amber-gold text-xs"></i>
                 <span>CUSTOM JAVA MINECRAFT MMO &bull; PVE CENTERED</span>
             </div>
 
-            <!-- Headline -->
-            <h1 class="font-cinzel text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white mb-6 leading-tight">
+            <h1 class="font-cinzel text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-bone mb-6 leading-tight">
                 LAIRS. DUNGEONS. BOSSES.<br/>
                 <span class="bg-gradient-to-r from-amber-soft via-amber-gold to-ember bg-clip-text text-transparent text-glow-amber">
                     Not Quite An RPG.
                 </span>
             </h1>
 
-            <!-- Subtitle -->
-            <p class="max-w-2xl mx-auto text-base sm:text-lg text-slate-400 leading-relaxed mb-10">
-                A relentless <strong class="text-white">PvE-focused Minecraft Java MMO</strong> built around high-stakes dungeon crawling, scripted multi-phase boss mechanics, and competitive clear speedrun leaderboards. No command bloat or generic level treadmills.
+            <p class="max-w-2xl mx-auto text-base sm:text-lg text-slate-400 leading-relaxed mb-4">
+                Vaelithra was a gilded kingdom whose wealth came from below. The surface is the last lit place;
+                everything worth having is down in the <strong class="text-bone">Lairs</strong>.
+            </p>
+            <p class="max-w-2xl mx-auto text-sm sm:text-base text-slate-400 leading-relaxed mb-10">
+                A <strong class="text-white">PvE Minecraft Java MMO</strong> built on its own plugins from the ground up:
+                every party descends into its own copy of a lair, breaks it stage by stage, kills its boss and climbs
+                back out, chasing best times on the server boards.
             </p>
 
-            <!-- Main CTAs -->
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button onclick="copyServerIP()" class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-gold to-amber-600 text-void-950 hover:brightness-110 shadow-xl shadow-amber-gold/20 transition-all flex items-center justify-center space-x-3">
                     <i class="fa-solid fa-terminal text-sm"></i>
                     <span>Copy Server IP</span>
-                    <span class="text-[11px] font-mono bg-void-950/20 px-2 py-0.5 rounded text-void-950">play.vaelithra.net</span>
+                    <span class="text-[11px] font-mono bg-void-950/20 px-2 py-0.5 rounded text-void-950" data-server-ip>play.vaelithra.net</span>
                 </button>
-                
-                <a href="https://discord.gg" target="_blank" class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-sm bg-void-800/90 hover:bg-void-700 text-slate-200 border border-slate-700 hover:border-amber-gold/40 transition-all flex items-center justify-center space-x-2">
+                <a href="https://discord.gg" data-discord-link target="_blank" rel="noopener" class="w-full sm:w-auto px-8 py-4 rounded-xl font-bold text-sm bg-void-800/90 hover:bg-void-700 text-slate-200 border border-slate-700 hover:border-amber-gold/40 transition-all flex items-center justify-center space-x-2">
                     <i class="fa-brands fa-discord text-indigo-400 text-base"></i>
                     <span>Join Dev Discord</span>
                 </a>
             </div>
+            <p class="mt-4 text-[11px] font-mono text-slate-500">The server is in private testing. The IP opens with the public beta.</p>
 
-            <!-- Tech Stats Ribbon -->
             <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 text-left">
                 <div class="glass-panel p-4 rounded-xl">
-                    <div class="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Engine Platform</div>
+                    <div class="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Platform</div>
                     <div class="text-sm font-bold text-white mt-1 flex items-center space-x-2">
                         <i class="fa-brands fa-java text-orange-400"></i>
-                        <span>Paper/Java 1.20+</span>
+                        <span>Java 1.21.11 &middot; Paper</span>
                     </div>
                 </div>
                 <div class="glass-panel p-4 rounded-xl">
                     <div class="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Core Gameplay</div>
-                    <div class="text-sm font-bold text-emerald-400 mt-1 flex items-center space-x-2">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        <span>Pure PvE Focus</span>
+                    <div class="text-sm font-bold text-soul mt-1 flex items-center space-x-2">
+                        <i class="fa-solid fa-dungeon"></i>
+                        <span>Instanced Party Lairs</span>
                     </div>
                 </div>
                 <div class="glass-panel p-4 rounded-xl">
                     <div class="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Client Setup</div>
                     <div class="text-sm font-bold text-amber-gold mt-1 flex items-center space-x-2">
                         <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        <span>Vanilla + Resourcepack</span>
+                        <span>Vanilla + Resource Pack</span>
                     </div>
                 </div>
                 <div class="glass-panel p-4 rounded-xl">
-                    <div class="text-[10px] font-mono text-slate-500 uppercase tracking-wider">PVP / GUILDS</div>
+                    <div class="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Social</div>
                     <div class="text-sm font-bold text-white mt-1 flex items-center space-x-2">
-                        <i class="fa-solid fa-swords text-amber-gold"></i>
-                        <span>Optional Guild Wars</span>
+                        <i class="fa-solid fa-people-group text-amber-gold"></i>
+                        <span>Parties &amp; Guilds</span>
                     </div>
                 </div>
             </div>
-
         </div>
     </section>
 
-    <!-- NOT QUITE RPG PHILOSOPHY PILLARS -->
+    <!-- PILLARS -->
     <section id="philosophy" class="relative z-10 py-24 bg-void-900/70 border-t border-b border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
             <div class="text-center max-w-3xl mx-auto mb-16">
                 <span class="text-xs font-mono font-semibold uppercase tracking-widest text-amber-gold block mb-2">// Server Pillars</span>
-                <h2 class="font-cinzel text-3xl sm:text-5xl font-black text-white mb-4">What Makes It "Not Quite RPG"?</h2>
+                <h2 class="font-cinzel text-3xl sm:text-5xl font-black text-bone mb-4">What Makes It "Not Quite RPG"?</h2>
                 <p class="text-slate-400 text-sm sm:text-base">
-                    We ditch stat inflation and endless level grinding. Vaelithra prioritizes action skill, team coordination, scripted boss encounters, and player-driven territory control.
+                    No open-world grind loop. The game is the descent: gear up on the surface, go down with your party,
+                    take what the lair guards and come back faster next time.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
-                <div class="glass-panel p-8 rounded-2xl border-l-4 border-l-amber-gold">
-                    <div class="w-12 h-12 rounded-xl bg-amber-gold/10 border border-amber-gold/30 flex items-center justify-center text-amber-gold text-xl mb-4">
-                        <i class="fa-solid fa-hand-fist"></i>
-                    </div>
-                    <h3 class="font-cinzel text-xl font-bold text-white mb-2">Physics & Skill-Based Combat</h3>
-                    <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                        Combat relies on positioning, hit timing, dodge rolls, and resource management rather than sitting still and clicking auto-attack spells against sponge mobs.
-                    </p>
-                </div>
-
                 <div class="glass-panel p-8 rounded-2xl border-l-4 border-l-ember">
                     <div class="w-12 h-12 rounded-xl bg-ember/10 border border-ember/30 flex items-center justify-center text-ember text-xl mb-4">
-                        <i class="fa-solid fa-dragon"></i>
+                        <i class="fa-solid fa-dungeon"></i>
                     </div>
-                    <h3 class="font-cinzel text-xl font-bold text-white mb-2">Living Bosses & Scripted Encounters</h3>
+                    <h3 class="font-cinzel text-xl font-bold text-white mb-2">A Lair for Every Party</h3>
                     <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                        Multi-phase bosses featuring telegraphed attacks, arena hazard transitions, add summons, and puzzle mechanics built specifically in Java.
+                        Each party gets its own fresh copy of the lair. Minibosses must fall in order, and each kill
+                        breaks a seal of old stonework so the way deeper opens. When the boss dies a portal appears;
+                        touch it and you return to the spot you descended from.
                     </p>
                 </div>
 
-                <div class="glass-panel p-8 rounded-2xl border-l-4 border-l-purple-500">
-                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xl mb-4">
-                        <i class="fa-solid fa-flag"></i>
+                <div class="glass-panel p-8 rounded-2xl border-l-4 border-l-amber-gold">
+                    <div class="w-12 h-12 rounded-xl bg-amber-gold/10 border border-amber-gold/30 flex items-center justify-center text-amber-gold text-xl mb-4">
+                        <i class="fa-solid fa-hand-sparkles"></i>
                     </div>
-                    <h3 class="font-cinzel text-xl font-bold text-white mb-2">Guild Wars & Territory Control</h3>
+                    <h3 class="font-cinzel text-xl font-bold text-white mb-2">Skills Are the Weapon</h3>
                     <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                        Guilds can declare war over outer Lair outposts, controlling key resource yields and showcasing their guild banner across the open world.
+                        Plain sword swings do nothing. Every weapon hit is a skill cast from the item itself, and it
+                        rolls against the target's defense, dodge and accuracy, with critical hits on top. Bosses and
+                        their minions carry the same stats, scaled by level.
+                    </p>
+                </div>
+
+                <div class="glass-panel p-8 rounded-2xl border-l-4 border-l-soul">
+                    <div class="w-12 h-12 rounded-xl bg-soul/10 border border-soul/30 flex items-center justify-center text-soul text-xl mb-4">
+                        <i class="fa-solid fa-gem"></i>
+                    </div>
+                    <h3 class="font-cinzel text-xl font-bold text-white mb-2">Gear That Grows With You</h3>
+                    <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                        Rarities, item sets with tiered bonuses, and typed gem sockets. Ability gems grant a skill, one
+                        of each per item; attribute gems stack. Gems can be removed and kept, and every stat line shows
+                        what is the item's own and what your gems add.
                     </p>
                 </div>
 
@@ -310,318 +322,293 @@
                     <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl mb-4">
                         <i class="fa-solid fa-stopwatch"></i>
                     </div>
-                    <h3 class="font-cinzel text-xl font-bold text-white mb-2">Clear Time & Mythic Speedruns</h3>
+                    <h3 class="font-cinzel text-xl font-bold text-white mb-2">Clear Times &amp; World Firsts</h3>
                     <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                        Compete for prestigious server clear time rankings across instanced mythic dungeons with real-time web leaderboards and seasonal rewards.
+                        Every counted run lands on the boards: best times, clears and fastest parties, solo and party
+                        kept apart, all-time and weekly. The first group to kill a listed boss is recorded for good and
+                        announced to the whole server.
                     </p>
                 </div>
+            </div>
 
+            <!-- Social row -->
+            <div class="mt-8 glass-panel p-6 rounded-2xl grid grid-cols-1 md:grid-cols-3 gap-6 text-xs sm:text-sm text-slate-400">
+                <div>
+                    <h4 class="font-cinzel text-base font-bold text-white mb-1"><i class="fa-solid fa-users text-amber-gold mr-2"></i>Parties</h4>
+                    Descend together and share experience from kills. Friendly fire is real: careless damage skills hit your own party.
+                </div>
+                <div>
+                    <h4 class="font-cinzel text-base font-bold text-white mb-1"><i class="fa-solid fa-chess-rook text-amber-gold mr-2"></i>Guilds</h4>
+                    Tags, three ranks, up to 30 members and a moderated guild chat. Guildmates are sworn: they can never harm each other, but buffs still land.
+                </div>
+                <div>
+                    <h4 class="font-cinzel text-base font-bold text-white mb-1"><i class="fa-solid fa-fire text-amber-gold mr-2"></i>Marks of Renown</h4>
+                    Cosmetic auras show who came back from below, alongside a cinematic main menu where you choose your starting weapon.
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- LIVE LEADERBOARD SECTION -->
+    <!-- LEADERBOARDS -->
     <section id="leaderboards" class="relative z-10 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
             <div class="text-center max-w-3xl mx-auto mb-12">
                 <span class="text-xs font-mono font-semibold uppercase tracking-widest text-amber-gold block mb-2">// Competitive Standings</span>
-                <h2 class="font-cinzel text-3xl sm:text-4xl font-extrabold text-white mb-3">Server Clear Time Leaderboards</h2>
-                <p class="text-slate-400 text-sm">Simulated preview of live in-game metrics, dungeon speedruns, and world-firsts.</p>
+                <h2 class="font-cinzel text-3xl sm:text-4xl font-extrabold text-bone mb-3">Lair Leaderboards</h2>
+                <p class="text-slate-400 text-sm">Read straight from the server's dungeon records. Test runs never count.</p>
             </div>
 
-            <!-- Leaderboard Tabs -->
-            <div class="flex justify-center space-x-2 sm:space-x-4 mb-8">
-                <button onclick="switchLeaderboard('dungeons')" id="tab-dungeons" class="tab-btn active px-4 py-2 rounded-xl text-xs font-mono font-bold border border-white/10 transition-all flex items-center space-x-2">
-                    <i class="fa-solid fa-stopwatch"></i>
-                    <span>Dungeon Speedruns</span>
+            <!-- Board type tabs -->
+            <div class="flex flex-wrap justify-center gap-2 sm:gap-4 mb-4">
+                <button onclick="setBoard('best')" id="tab-best" class="tab-btn active px-4 py-2 rounded-xl text-xs font-mono font-bold border border-white/10 text-slate-400 hover:text-white transition-all flex items-center space-x-2">
+                    <i class="fa-solid fa-stopwatch"></i><span>Best Times</span>
                 </button>
-                <button onclick="switchLeaderboard('bosses')" id="tab-bosses" class="tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-white/10 text-slate-400 hover:text-white transition-all flex items-center space-x-2">
-                    <i class="fa-solid fa-skull"></i>
-                    <span>World-First Slabs</span>
+                <button onclick="setBoard('clears')" id="tab-clears" class="tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-white/10 text-slate-400 hover:text-white transition-all flex items-center space-x-2">
+                    <i class="fa-solid fa-trophy"></i><span>Most Clears</span>
                 </button>
-                <button onclick="switchLeaderboard('guilds')" id="tab-guilds" class="tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-white/10 text-slate-400 hover:text-white transition-all flex items-center space-x-2">
-                    <i class="fa-solid fa-shield"></i>
-                    <span>Top Guilds</span>
+                <button onclick="setBoard('runs')" id="tab-runs" class="tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-white/10 text-slate-400 hover:text-white transition-all flex items-center space-x-2">
+                    <i class="fa-solid fa-people-group"></i><span>Fastest Parties</span>
+                </button>
+                <button onclick="setBoard('firsts')" id="tab-firsts" class="tab-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-white/10 text-slate-400 hover:text-white transition-all flex items-center space-x-2">
+                    <i class="fa-solid fa-skull"></i><span>World Firsts</span>
                 </button>
             </div>
 
-            <!-- Table Container -->
+            <!-- Filters -->
+            <div id="boardFilters" class="flex flex-wrap justify-center items-center gap-2 mb-8 text-[11px] font-mono">
+                <select id="dungeonSelect" onchange="setDungeon(this.value)" class="bg-void-800 border border-white/10 rounded-lg px-3 py-1.5 text-slate-300" aria-label="Lair"></select>
+                <span id="modeGroup" class="flex gap-1">
+                    <button onclick="setMode('solo')" id="mode-solo" class="seg-btn active px-3 py-1.5 rounded-lg border border-white/10 text-slate-400">Solo</button>
+                    <button onclick="setMode('party')" id="mode-party" class="seg-btn px-3 py-1.5 rounded-lg border border-white/10 text-slate-400">Party</button>
+                </span>
+                <span class="flex gap-1">
+                    <button onclick="setPeriod('alltime')" id="period-alltime" class="seg-btn active px-3 py-1.5 rounded-lg border border-white/10 text-slate-400">All-time</button>
+                    <button onclick="setPeriod('weekly')" id="period-weekly" class="seg-btn px-3 py-1.5 rounded-lg border border-white/10 text-slate-400">This week</button>
+                </span>
+            </div>
+
             <div class="glass-panel rounded-2xl overflow-hidden border border-white/10">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-xs sm:text-sm">
                         <thead>
                             <tr class="border-b border-white/10 bg-void-800/80 font-mono text-slate-400 text-[11px] uppercase tracking-wider">
                                 <th class="py-4 px-6">Rank</th>
-                                <th class="py-4 px-6" id="th-col2">Party / Player</th>
-                                <th class="py-4 px-6" id="th-col3">Dungeon / Boss</th>
+                                <th class="py-4 px-6" id="th-col2">Player</th>
+                                <th class="py-4 px-6" id="th-col3">Lair</th>
                                 <th class="py-4 px-6 text-right" id="th-col4">Clear Time</th>
                             </tr>
                         </thead>
-                        <tbody id="leaderboardBody" class="divide-y divide-white/5 font-mono text-slate-300">
-                            <!-- Populated via Javascript -->
-                        </tbody>
+                        <tbody id="leaderboardBody" class="divide-y divide-white/5 font-mono text-slate-300"></tbody>
                     </table>
                 </div>
+                <div id="boardFooter" class="px-6 py-3 border-t border-white/5 text-[11px] font-mono text-slate-500"></div>
             </div>
-
         </div>
     </section>
 
-    <!-- JAVA DEVELOPMENT ROADMAP -->
+    <!-- ROADMAP -->
     <section id="roadmap" class="relative z-10 py-24 bg-void-900/70 border-t border-b border-white/5">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            
             <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="text-xs font-mono font-semibold uppercase tracking-widest text-amber-gold block mb-2">// Java Server Pipeline</span>
-                <h2 class="font-cinzel text-3xl sm:text-4xl font-extrabold text-white mb-3">Development Milestones</h2>
-                <p class="text-slate-400 text-sm">Transparent progress on custom Paper plugins, MythicMobs scripts, and client resourcepack integration.</p>
+                <span class="text-xs font-mono font-semibold uppercase tracking-widest text-amber-gold block mb-2">// Development Path</span>
+                <h2 class="font-cinzel text-3xl sm:text-4xl font-extrabold text-bone mb-3">Development Milestones</h2>
+                <p class="text-slate-400 text-sm">Every system is our own Paper plugin. Built means the code is done; tested means it has been played in-game.</p>
             </div>
 
-            <!-- Milestone Steps -->
             <div class="space-y-4">
-                
                 <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-500">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
-                                <i class="fa-solid fa-check"></i>
-                            </div>
+                    <div class="flex items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-start sm:items-center space-x-4">
+                            <div class="w-8 h-8 shrink-0 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs"><i class="fa-solid fa-check"></i></div>
                             <div>
                                 <span class="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">Phase 1 &bull; Completed</span>
-                                <h3 class="font-cinzel text-base font-bold text-white">Core Custom Plugin Architecture & Item Engine</h3>
+                                <h3 class="font-cinzel text-base font-bold text-white">Framework Core</h3>
+                                <p class="text-xs text-slate-400 mt-1">Player profiles saved safely off the main thread, stats and combat, items, rarities, sets, levels and experience.</p>
                             </div>
                         </div>
-                        <span class="text-xs font-mono text-slate-500">Java / Paper 1.20</span>
+                        <span class="hidden sm:block text-xs font-mono text-slate-500 shrink-0">RPGCore</span>
                     </div>
                 </div>
 
                 <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-500">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
-                                <i class="fa-solid fa-check"></i>
-                            </div>
+                    <div class="flex items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-start sm:items-center space-x-4">
+                            <div class="w-8 h-8 shrink-0 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs"><i class="fa-solid fa-check"></i></div>
                             <div>
                                 <span class="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">Phase 2 &bull; Completed</span>
-                                <h3 class="font-cinzel text-base font-bold text-white">ModelEngine 4 & Custom UI Resourcepack Setup</h3>
+                                <h3 class="font-cinzel text-base font-bold text-white">Arrival &amp; Social</h3>
+                                <p class="text-xs text-slate-400 mt-1">Cinematic main menu and starter weapons, parties, guilds (tested in-game), chat channels and moderation, auras, potion HUD.</p>
                             </div>
                         </div>
-                        <span class="text-xs font-mono text-slate-500">Assets & HUD</span>
+                        <span class="hidden sm:block text-xs font-mono text-slate-500 shrink-0">RealmMenu &middot; ChatHeadTooltip</span>
                     </div>
                 </div>
 
                 <div class="glass-panel p-6 rounded-xl border-l-4 border-l-amber-gold bg-amber-gold/5">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-8 h-8 rounded-full bg-amber-gold/20 text-amber-gold flex items-center justify-center font-bold text-xs animate-pulse">
-                                <i class="fa-solid fa-spinner animate-spin"></i>
-                            </div>
+                    <div class="flex items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-start sm:items-center space-x-4">
+                            <div class="w-8 h-8 shrink-0 rounded-full bg-amber-gold/20 text-amber-gold flex items-center justify-center text-xs"><i class="fa-solid fa-spinner animate-spin"></i></div>
                             <div>
                                 <span class="text-[10px] font-mono text-amber-gold uppercase tracking-widest">Phase 3 &bull; Active Focus</span>
-                                <h3 class="font-cinzel text-base font-bold text-white">Boss AI Scripting & Instanced Dungeon "Shattered Crypt"</h3>
+                                <h3 class="font-cinzel text-base font-bold text-white">The Lairs</h3>
+                                <p class="text-xs text-slate-400 mt-1">Built, now in in-game testing: per-party lair instances, ordered minibosses, sealed gates, the boss portal, skill-based combat, gem sockets, leaderboards and world firsts.</p>
                             </div>
                         </div>
-                        <span class="text-xs font-mono text-amber-gold">Development</span>
+                        <span class="hidden sm:block text-xs font-mono text-amber-gold shrink-0">DungeonCore</span>
                     </div>
                 </div>
 
-                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-slate-700 opacity-75">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-8 h-8 rounded-full bg-void-800 text-slate-500 flex items-center justify-center font-bold text-xs">4</div>
+                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-slate-700 opacity-80">
+                    <div class="flex items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-start sm:items-center space-x-4">
+                            <div class="w-8 h-8 shrink-0 rounded-full bg-void-800 text-slate-500 flex items-center justify-center font-bold text-xs">4</div>
                             <div>
-                                <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Phase 4 &bull; Upcoming</span>
-                                <h3 class="font-cinzel text-base font-bold text-slate-300">Internal Playtests & Guild Warfare Balance</h3>
+                                <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Phase 4 &bull; Coming Soon</span>
+                                <h3 class="font-cinzel text-base font-bold text-slate-300">A Bigger World</h3>
+                                <p class="text-xs text-slate-500 mt-1">Lairs moved to their own server for performance, a quiet and heavy death screen, a refreshed tab list, and a staff web panel.</p>
                             </div>
                         </div>
-                        <span class="text-xs font-mono text-slate-500">Testing Phase</span>
+                        <span class="hidden sm:block text-xs font-mono text-slate-500 shrink-0">Planned</span>
                     </div>
                 </div>
 
-                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-slate-700 opacity-75">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-8 h-8 rounded-full bg-void-800 text-slate-500 flex items-center justify-center font-bold text-xs">5</div>
+                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-slate-700 opacity-70">
+                    <div class="flex items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-start sm:items-center space-x-4">
+                            <div class="w-8 h-8 shrink-0 rounded-full bg-void-800 text-slate-500 flex items-center justify-center font-bold text-xs">5</div>
                             <div>
                                 <span class="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Phase 5 &bull; Future</span>
-                                <h3 class="font-cinzel text-base font-bold text-slate-300">Public Beta Server Launch</h3>
+                                <h3 class="font-cinzel text-base font-bold text-slate-300">Public Beta</h3>
+                                <p class="text-xs text-slate-500 mt-1">The server opens and the boards start counting for real.</p>
                             </div>
                         </div>
-                        <span class="text-xs font-mono text-slate-500">Public Access</span>
+                        <span class="hidden sm:block text-xs font-mono text-slate-500 shrink-0">Public Access</span>
                     </div>
                 </div>
-
             </div>
         </div>
     </section>
 
-    <!-- DEVLOGS SECTION -->
+    <!-- DEVLOGS -->
     <section id="devlogs" class="relative z-10 py-24">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
                 <div>
                     <span class="text-xs font-mono font-semibold uppercase tracking-widest text-amber-gold block mb-2">// Developer Dispatches</span>
-                    <h2 class="font-cinzel text-3xl sm:text-4xl font-extrabold text-white">Java Dev Updates</h2>
+                    <h2 class="font-cinzel text-3xl sm:text-4xl font-extrabold text-bone">Dev Updates</h2>
                 </div>
-
-                <!-- Category Filters -->
                 <div class="flex flex-wrap gap-2 mt-4 md:mt-0">
-                    <button onclick="filterDevlogs('all')" class="dev-filter-btn active px-3 py-1.5 rounded-lg text-xs font-mono bg-amber-gold text-void-950 font-bold">All</button>
-                    <button onclick="filterDevlogs('java')" class="dev-filter-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-void-800 text-slate-400 hover:text-white border border-white/5">Tech / Java</button>
-                    <button onclick="filterDevlogs('boss')" class="dev-filter-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-void-800 text-slate-400 hover:text-white border border-white/5">Boss Design</button>
-                    <button onclick="filterDevlogs('dungeon')" class="dev-filter-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-void-800 text-slate-400 hover:text-white border border-white/5">Dungeons</button>
+                    <button onclick="filterDevlogs('all', this)" class="dev-filter-btn active px-3 py-1.5 rounded-lg text-xs font-mono bg-void-800 text-slate-400 hover:text-white border border-white/5">All</button>
+                    <button onclick="filterDevlogs('dungeon', this)" class="dev-filter-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-void-800 text-slate-400 hover:text-white border border-white/5">Lairs</button>
+                    <button onclick="filterDevlogs('combat', this)" class="dev-filter-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-void-800 text-slate-400 hover:text-white border border-white/5">Combat &amp; Gear</button>
+                    <button onclick="filterDevlogs('social', this)" class="dev-filter-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-void-800 text-slate-400 hover:text-white border border-white/5">Social</button>
+                    <button onclick="filterDevlogs('tech', this)" class="dev-filter-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-void-800 text-slate-400 hover:text-white border border-white/5">Tech</button>
                 </div>
             </div>
 
-            <!-- Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                
-                <article class="devlog-card glass-panel glass-panel-hover rounded-2xl overflow-hidden cursor-pointer" data-category="boss" onclick="openDevlogModal(1)">
-                    <div class="h-36 bg-gradient-to-br from-ember/20 via-void-800 to-void-900 p-6 flex flex-col justify-between">
-                        <span class="px-2.5 py-1 rounded bg-ember/20 text-ember text-[10px] font-mono font-bold tracking-wider uppercase border border-ember/30 w-fit">Boss Design</span>
-                        <div class="text-[11px] font-mono text-slate-400">October 2026</div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="font-cinzel text-lg font-bold text-white mb-2">Devlog #15: Multi-Phase Scripting for 'Aethelgard the Sunken'</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed line-clamp-3">
-                            A breakdown of how MythicMobs mechanics and custom hitboxes prevent players from cheesing bosses with classic pillar-nerf tactics.
-                        </p>
-                        <div class="mt-4 flex items-center text-xs font-mono text-amber-gold space-x-1">
-                            <span>Read Briefing</span>
-                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="devlog-card glass-panel glass-panel-hover rounded-2xl overflow-hidden cursor-pointer" data-category="java" onclick="openDevlogModal(2)">
-                    <div class="h-36 bg-gradient-to-br from-amber-gold/20 via-void-800 to-void-900 p-6 flex flex-col justify-between">
-                        <span class="px-2.5 py-1 rounded bg-amber-gold/20 text-amber-soft text-[10px] font-mono font-bold tracking-wider uppercase border border-amber-gold/30 w-fit">Tech / Java</span>
-                        <div class="text-[11px] font-mono text-slate-400">September 2026</div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="font-cinzel text-lg font-bold text-white mb-2">Devlog #14: Custom Paper Packet Handler for Zero Lag</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed line-clamp-3">
-                            How we engineered our instanced dungeon allocation system to maintain 20.0 TPS with dozens of simultaneous active parties.
-                        </p>
-                        <div class="mt-4 flex items-center text-xs font-mono text-amber-gold space-x-1">
-                            <span>Read Briefing</span>
-                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="devlog-card glass-panel glass-panel-hover rounded-2xl overflow-hidden cursor-pointer" data-category="dungeon" onclick="openDevlogModal(3)">
-                    <div class="h-36 bg-gradient-to-br from-mythic/20 via-void-800 to-void-900 p-6 flex flex-col justify-between">
-                        <span class="px-2.5 py-1 rounded bg-mythic/20 text-purple-300 text-[10px] font-mono font-bold tracking-wider uppercase border border-mythic/30 w-fit">Dungeons</span>
-                        <div class="text-[11px] font-mono text-slate-400">September 2026</div>
-                    </div>
-                    <div class="p-6">
-                        <h3 class="font-cinzel text-lg font-bold text-white mb-2">Devlog #13: Puzzle Gates & Keystone Modifiers</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed line-clamp-3">
-                            Introducing dynamic dungeon key modifiers like 'Volatile Blood' and 'Shadow Step' for Mythic clear speedruns.
-                        </p>
-                        <div class="mt-4 flex items-center text-xs font-mono text-purple-400 space-x-1">
-                            <span>Read Briefing</span>
-                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                        </div>
-                    </div>
-                </article>
-
-            </div>
+            <!-- Cards are rendered from DEVLOGS below -->
+            <div id="devlogGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
         </div>
     </section>
 
-    <!-- FAQ SECTION -->
+    <!-- FAQ -->
     <section id="faq" class="relative z-10 py-24 bg-void-900/70 border-t border-b border-white/5">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <span class="text-xs font-mono font-semibold uppercase tracking-widest text-amber-gold block mb-2">// Server Queries</span>
-                <h2 class="font-cinzel text-3xl sm:text-4xl font-extrabold text-white">Frequently Asked Questions</h2>
+                <h2 class="font-cinzel text-3xl sm:text-4xl font-extrabold text-bone">Frequently Asked Questions</h2>
             </div>
 
             <div class="space-y-4">
                 <details class="glass-panel p-6 rounded-2xl group cursor-pointer">
                     <summary class="font-cinzel font-bold text-white text-base flex justify-between items-center list-none">
-                        <span>Is Vaelithra a Java or Bedrock Minecraft server?</span>
+                        <span>Can I play right now?</span>
                         <i class="fa-solid fa-chevron-down text-amber-gold group-open:rotate-180 transition-transform text-xs"></i>
                     </summary>
                     <p class="text-xs sm:text-sm text-slate-400 mt-4 leading-relaxed font-sans">
-                        Vaelithra is built specifically for **Minecraft Java Edition** (1.20.4+). You can join using a standard vanilla Java client; our custom UI and boss models load dynamically via server-side resourcepack prompts.
+                        Not yet. Vaelithra is in private development and testing. The public beta date will be announced on Discord.
                     </p>
                 </details>
 
                 <details class="glass-panel p-6 rounded-2xl group cursor-pointer">
                     <summary class="font-cinzel font-bold text-white text-base flex justify-between items-center list-none">
-                        <span>How does the PvE focus work with PvP?</span>
+                        <span>Is Vaelithra a Java or Bedrock server?</span>
                         <i class="fa-solid fa-chevron-down text-amber-gold group-open:rotate-180 transition-transform text-xs"></i>
                     </summary>
                     <p class="text-xs sm:text-sm text-slate-400 mt-4 leading-relaxed font-sans">
-                        PvE is our primary focus. All core progression, dungeons, gear upgrades, and bosses are entirely PvE. PvP acts as a voluntary side dish available in opt-in battle arenas, special contested Lairs, and scheduled Guild Wars.
+                        Java Edition only, running on Paper for Minecraft <strong class="text-white">1.21.11</strong>.
                     </p>
                 </details>
 
                 <details class="glass-panel p-6 rounded-2xl group cursor-pointer">
                     <summary class="font-cinzel font-bold text-white text-base flex justify-between items-center list-none">
-                        <span>Do I need heavy client mods to play?</span>
+                        <span>Do I need client mods?</span>
                         <i class="fa-solid fa-chevron-down text-amber-gold group-open:rotate-180 transition-transform text-xs"></i>
                     </summary>
                     <p class="text-xs sm:text-sm text-slate-400 mt-4 leading-relaxed font-sans">
-                        No client mods or Forge/Fabric setups are strictly required! We leverage server-side Paper pipelines, custom packets, and ModelEngine to deliver animated bosses and custom HUD elements seamlessly.
+                        No. A vanilla client is enough; the server sends a resource pack for custom icons, item models and interface glyphs.
                     </p>
                 </details>
 
                 <details class="glass-panel p-6 rounded-2xl group cursor-pointer">
                     <summary class="font-cinzel font-bold text-white text-base flex justify-between items-center list-none">
-                        <span>How do Guild Wars and Leaderboards function?</span>
+                        <span>Can I hurt other players?</span>
                         <i class="fa-solid fa-chevron-down text-amber-gold group-open:rotate-180 transition-transform text-xs"></i>
                     </summary>
                     <p class="text-xs sm:text-sm text-slate-400 mt-4 leading-relaxed font-sans">
-                        Guilds can capture outer regional outposts to gain active bonus yields. Speedrun leaderboards automatically track instanced mythic dungeon clear times and register world-first boss slays.
+                        Vaelithra is PvE first. Inside a party, friendly fire is on, so damage and debuff skills can hit your own party.
+                        Members of the same guild can never harm each other, even in a party, while buffs still reach them.
+                    </p>
+                </details>
+
+                <details class="glass-panel p-6 rounded-2xl group cursor-pointer">
+                    <summary class="font-cinzel font-bold text-white text-base flex justify-between items-center list-none">
+                        <span>How do the leaderboards work?</span>
+                        <i class="fa-solid fa-chevron-down text-amber-gold group-open:rotate-180 transition-transform text-xs"></i>
+                    </summary>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-4 leading-relaxed font-sans">
+                        Each lair keeps best times, clears and failed runs, plus a fastest-parties board. Solo runs and party runs
+                        (two or more players) are ranked separately, both all-time and weekly. Staff test runs never count.
+                        World firsts record the first group to kill each listed boss, once and forever. The same boards stand in-game
+                        with a podium of the top five players.
                     </p>
                 </details>
             </div>
         </div>
     </section>
 
-    <!-- CENTERED FOOTER -->
+    <!-- FOOTER -->
     <footer class="relative z-10 glass-panel border-t border-white/10 py-12 text-slate-400 text-xs">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-            
-            <!-- Brand centered -->
             <div class="flex items-center justify-center space-x-3">
                 <div class="w-8 h-8 rounded bg-amber-gold/20 border border-amber-gold/40 flex items-center justify-center text-amber-gold font-bold">
-                    <i class="fa-solid fa-cube text-xs"></i>
+                    <i class="fa-solid fa-dungeon text-xs"></i>
                 </div>
-                <span class="font-cinzel text-xl font-black text-white tracking-widest">VAELITHRA</span>
+                <span class="font-cinzel text-xl font-black text-bone tracking-widest">VAELITHRA</span>
             </div>
 
-            <!-- Subheading centered -->
+            <p class="font-cinzel text-amber-gold tracking-widest">Descend. Endure. Return.</p>
             <p class="text-slate-400 max-w-md mx-auto leading-relaxed">
-                A custom Java Minecraft server project redefining multiplayer PvE dungeon crawling, scripted boss mechanics, and competitive clear speedruns.
+                A custom Java Minecraft MMO about going down into the Lairs with your party and coming back out alive.
             </p>
 
-            <!-- Centered Nav Links -->
             <div class="flex flex-wrap justify-center gap-6 font-mono text-[11px] text-slate-300">
-                <a href="#philosophy" class="hover:text-amber-gold transition-colors">Design Pillars</a>
+                <a href="#philosophy" class="hover:text-amber-gold transition-colors">Pillars</a>
                 <a href="#leaderboards" class="hover:text-amber-gold transition-colors">Leaderboards</a>
                 <a href="#roadmap" class="hover:text-amber-gold transition-colors">Roadmap</a>
                 <a href="#devlogs" class="hover:text-amber-gold transition-colors">Devlogs</a>
                 <a href="#faq" class="hover:text-amber-gold transition-colors">FAQ</a>
-                <a href="https://discord.gg" target="_blank" class="hover:text-amber-gold transition-colors"><i class="fa-brands fa-discord text-indigo-400 mr-1"></i>Discord</a>
+                <a href="https://discord.gg" data-discord-link target="_blank" rel="noopener" class="hover:text-amber-gold transition-colors"><i class="fa-brands fa-discord text-indigo-400 mr-1"></i>Discord</a>
             </div>
 
-            <!-- Server IP Copy Button Centered -->
             <div class="pt-2">
                 <button onclick="copyServerIP()" class="inline-flex items-center space-x-2 px-4 py-2 rounded-lg bg-void-800 border border-amber-gold/30 hover:border-amber-gold text-slate-200 text-xs font-mono transition-all">
                     <i class="fa-solid fa-terminal text-amber-gold"></i>
-                    <span>play.vaelithra.net</span>
+                    <span data-server-ip>play.vaelithra.net</span>
                     <i class="fa-solid fa-copy text-slate-500 text-[10px]"></i>
                 </button>
             </div>
 
-            <!-- Copyright -->
             <div class="border-t border-white/5 pt-6 text-slate-500 font-mono text-[11px]">
                 <p>&copy; 2026 Vaelithra Minecraft Development. Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.</p>
             </div>
@@ -629,9 +616,9 @@
     </footer>
 
     <!-- DEVLOG MODAL -->
-    <div id="devlogModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-void-950/80 backdrop-blur-md">
+    <div id="devlogModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-void-950/80 backdrop-blur-md" role="dialog" aria-modal="true">
         <div class="glass-panel max-w-2xl w-full rounded-2xl p-6 border border-white/10 shadow-2xl relative max-h-[85vh] overflow-y-auto">
-            <button onclick="closeDevlogModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+            <button onclick="closeDevlogModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white" aria-label="Close">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
             <div id="devlogModalContent"></div>
@@ -639,41 +626,66 @@
     </div>
 
     <script>
+        // --- Site settings: change these in one place ---
+        const SITE = {
+            serverIp: "play.vaelithra.net",
+            discordUrl: "https://discord.gg",
+            // Folder holding the JSON files DungeonCore writes to plugins/DungeonCore/web/ (index.json, <lair>.json, world-firsts.json).
+            leaderboardPath: "data/leaderboards/",
+        };
+
+        document.querySelectorAll('[data-server-ip]').forEach(el => { el.textContent = SITE.serverIp; });
+        document.querySelectorAll('[data-discord-link]').forEach(el => { el.href = SITE.discordUrl; });
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
         // --- Mobile Menu ---
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const mobileMenu = document.getElementById('mobileMenu');
         mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
+            const open = mobileMenu.classList.toggle('hidden') === false;
+            mobileMenuBtn.setAttribute('aria-expanded', String(open));
         });
+        mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+            mobileMenuBtn.setAttribute('aria-expanded', 'false');
+        }));
 
-        // --- Copy IP Functionality ---
-        function copyServerIP() {
-            const ip = "play.vaelithra.net";
-            const tempInput = document.createElement('input');
-            tempInput.value = ip;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-
-            // Toast Animation
+        // --- Copy IP ---
+        let toastTimer;
+        function showToast(title) {
+            document.getElementById('toastTitle').textContent = title;
             const toast = document.getElementById('toast');
             toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
         }
 
-        // --- Particle Embers Background ---
+        function copyServerIP() {
+            const fallback = () => {
+                const temp = document.createElement('textarea');
+                temp.value = SITE.serverIp;
+                document.body.appendChild(temp);
+                temp.select();
+                const ok = document.execCommand('copy');
+                document.body.removeChild(temp);
+                showToast(ok ? 'Server IP Copied!' : 'Copy failed, select the IP instead');
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(SITE.serverIp).then(() => showToast('Server IP Copied!'), fallback);
+            } else {
+                fallback();
+            }
+        }
+
+        // --- Embers and soul motes ---
         const canvas = document.getElementById('particleCanvas');
         const ctx = canvas.getContext('2d');
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         let particles = [];
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            initParticles();
-        }
+        const PARTICLE_COLORS = ['rgba(217, 164, 65,', 'rgba(181, 69, 47,', 'rgba(95, 182, 201,'];
 
         class Particle {
             constructor() {
@@ -683,7 +695,8 @@
                 this.speedY = -(Math.random() * 0.4 + 0.1);
                 this.speedX = (Math.random() - 0.5) * 0.2;
                 this.alpha = Math.random() * 0.6 + 0.2;
-                this.color = Math.random() > 0.5 ? 'rgba(229, 184, 66,' : 'rgba(255, 85, 51,';
+                const roll = Math.random();
+                this.color = roll < 0.5 ? PARTICLE_COLORS[0] : roll < 0.8 ? PARTICLE_COLORS[1] : PARTICLE_COLORS[2];
             }
             update() {
                 this.y += this.speedY;
@@ -701,135 +714,289 @@
             }
         }
 
-        function initParticles() {
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
             particles = [];
             const count = Math.min(Math.floor(canvas.width / 20), 50);
-            for (let i = 0; i < count; i++) {
-                particles.push(new Particle());
-            }
+            for (let i = 0; i < count; i++) particles.push(new Particle());
+            if (reduceMotion) drawParticles();
+        }
+
+        function drawParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => p.draw());
         }
 
         function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
+            particles.forEach(p => p.update());
+            drawParticles();
             requestAnimationFrame(animateParticles);
         }
 
         window.addEventListener('resize', resizeCanvas);
-        window.onload = () => {
-            resizeCanvas();
-            animateParticles();
-            switchLeaderboard('dungeons');
-        };
 
-        // --- LEADERBOARD TAB DATA & LOGIC ---
-        const leaderboardData = {
-            dungeons: [
-                { rank: "#1", col2: "Squad [Vanguard]", col3: "Shattered Crypt (Mythic +5)", col4: "08m 42s" },
-                { rank: "#2", col2: "Party [Eclipse]", col3: "Shattered Crypt (Mythic +5)", col4: "09m 15s" },
-                { rank: "#3", col2: "Duo [Shadows]", col3: "Sunken Temple (Mythic +3)", col4: "11m 02s" },
-                { rank: "#4", col2: "Solo [Axiom]", col3: "Ashen Caverns (Level I)", col4: "12m 45s" }
-            ],
-            bosses: [
-                { rank: "SLAB 1", col2: "Guild [Aethelgard]", col3: "World Boss: Ignis the Unbroken", col4: "Oct 12, 2026" },
-                { rank: "SLAB 2", col2: "Guild [Vanguard]", col3: "Lair Boss: Frost Monarch", col4: "Oct 08, 2026" },
-                { rank: "SLAB 3", col2: "Party [Null]", col3: "Dungeon Boss: Soul Weaver", col4: "Sep 28, 2026" }
-            ],
-            guilds: [
-                { rank: "Rank 1", col2: "[Vanguard] Guild", col3: "Lair Control: 4 Regions", col4: "14,250 PTS" },
-                { rank: "Rank 2", col2: "[Eclipse] Syndicate", col3: "Lair Control: 2 Regions", col4: "11,800 PTS" },
-                { rank: "Rank 3", col2: "[Aethelgard] Order", col3: "Lair Control: 1 Region", col4: "9,450 PTS" }
-            ]
-        };
+        // --- LEADERBOARDS (DungeonCore web export, schema 1) ---
+        const board = { type: 'best', mode: 'solo', period: 'alltime', dungeon: null };
+        const boardData = { index: null, dungeons: {}, firsts: null, error: null };
 
-        function switchLeaderboard(type) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`tab-${type}`).classList.add('active');
-
-            const body = document.getElementById('leaderboardBody');
-            const data = leaderboardData[type];
-
-            if (type === 'dungeons') {
-                document.getElementById('th-col2').innerText = 'Party / Player';
-                document.getElementById('th-col3').innerText = 'Dungeon & Difficulty';
-                document.getElementById('th-col4').innerText = 'Clear Time';
-            } else if (type === 'bosses') {
-                document.getElementById('th-col2').innerText = 'Slayer Group';
-                document.getElementById('th-col3').innerText = 'Boss Encounter';
-                document.getElementById('th-col4').innerText = 'First Kill Date';
-            } else {
-                document.getElementById('th-col2').innerText = 'Guild Name';
-                document.getElementById('th-col3').innerText = 'Territory Control';
-                document.getElementById('th-col4').innerText = 'Season Score';
-            }
-
-            body.innerHTML = data.map((item) => `
-                <tr class="hover:bg-white/5 transition-colors">
-                    <td class="py-4 px-6 text-amber-gold font-bold">${item.rank}</td>
-                    <td class="py-4 px-6 text-white">${item.col2}</td>
-                    <td class="py-4 px-6 text-slate-400">${item.col3}</td>
-                    <td class="py-4 px-6 text-right text-emerald-400 font-bold">${item.col4}</td>
-                </tr>
-            `).join('');
+        async function fetchJson(file) {
+            const response = await fetch(SITE.leaderboardPath + file, { cache: 'no-cache' });
+            if (!response.ok) throw new Error(`${file}: HTTP ${response.status}`);
+            const json = await response.json();
+            if (json.schema !== 1) throw new Error(`${file}: unsupported schema ${json.schema}`);
+            return json;
         }
 
-        // --- DEVLOG FILTERING ---
-        function filterDevlogs(cat) {
-            document.querySelectorAll('.dev-filter-btn').forEach(b => {
-                b.classList.remove('bg-amber-gold', 'text-void-950', 'font-bold');
-                b.classList.add('bg-void-800', 'text-slate-400');
-            });
-            event.target.classList.add('bg-amber-gold', 'text-void-950', 'font-bold');
-            
-            document.querySelectorAll('.devlog-card').forEach(card => {
-                if (cat === 'all' || card.dataset.category === cat) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
+        async function loadLeaderboards() {
+            try {
+                boardData.index = await fetchJson('index.json');
+                const select = document.getElementById('dungeonSelect');
+                select.innerHTML = boardData.index.dungeons
+                    .map(d => `<option value="${escapeHtml(d.id)}">${escapeHtml(d.name)}</option>`).join('');
+                if (boardData.index.dungeons.length) await setDungeon(boardData.index.dungeons[0].id);
+            } catch (e) {
+                boardData.error = e;
+            }
+            if (board.type === 'firsts') return setBoard('firsts');
+            renderBoard();
+        }
+
+        async function setDungeon(id) {
+            board.dungeon = id;
+            if (!boardData.dungeons[id]) {
+                const entry = boardData.index.dungeons.find(d => d.id === id);
+                try {
+                    boardData.dungeons[id] = await fetchJson(entry.file);
+                } catch (e) {
+                    boardData.dungeons[id] = { error: e };
                 }
-            });
+            }
+            renderBoard();
         }
 
-        // --- DEVLOG MODAL ---
-        const devlogDetails = {
-            1: {
-                title: "Devlog #15: Multi-Phase Scripting for 'Aethelgard the Sunken'",
-                date: "October 2026",
-                cat: "Boss Design",
-                text: "<p class='mb-3'>In vanilla Minecraft, players quickly trivialize bosses by building 3-block towers or trapping entities in corners. For Vaelithra, every boss is built with ModelEngine and MythicMobs Java scripting.</p><p>Aethelgard features arena-wide floor collapses, phase-2 shield breaks requiring key item interaction, and directional cleaves.</p>"
-            },
-            2: {
-                title: "Devlog #14: Custom Paper Packet Handler for Zero Lag",
-                date: "September 2026",
-                cat: "Tech / Java",
-                text: "<p class='mb-3'>Running dozens of concurrent instanced dungeons on a single Java server instance presents unique TPS challenges.</p><p>We implemented a lightweight dynamic entity ticking system in custom C++/Java packet filters that suspends non-essential particles outside active player sight cones.</p>"
-            },
-            3: {
-                title: "Devlog #13: Puzzle Gates & Keystone Modifiers",
-                date: "September 2026",
-                cat: "Dungeons",
-                text: "<p class='mb-3'>Mythic dungeon keys introduce random environmental mutators like 'Ember Spikes' and 'Shadow Pulse'.</p><p>Teams must coordinate role abilities to disarm ancient elemental gates under strict speedrun timers.</p>"
+        async function setBoard(type) {
+            board.type = type;
+            if (type === 'runs') board.mode = 'party';
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.id === `tab-${type}`));
+            if (type === 'firsts' && !boardData.firsts && boardData.index) {
+                try {
+                    boardData.firsts = await fetchJson(boardData.index.world_firsts || 'world-firsts.json');
+                } catch (e) {
+                    boardData.firsts = { error: e };
+                }
             }
+            renderBoard();
+        }
+
+        function setMode(mode) {
+            if (board.type === 'runs') return;
+            board.mode = mode;
+            renderBoard();
+        }
+
+        function setPeriod(period) {
+            board.period = period;
+            renderBoard();
+        }
+
+        function formatTime(ms) {
+            const total = Math.max(0, Math.round(ms / 1000));
+            const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60;
+            const mm = String(m).padStart(2, '0'), ss = String(s).padStart(2, '0');
+            return h ? `${h}h ${mm}m ${ss}s` : `${mm}m ${ss}s`;
+        }
+
+        function formatDate(ms) {
+            return ms ? new Date(ms).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+        }
+
+        function namesOf(members) {
+            return (members || []).map(m => escapeHtml(m.name)).join(', ');
+        }
+
+        function emptyRow(text) {
+            return `<tr><td colspan="4" class="py-10 px-6 text-center text-slate-500 font-sans">${text}</td></tr>`;
+        }
+
+        function renderBoard() {
+            const body = document.getElementById('leaderboardBody');
+            const footer = document.getElementById('boardFooter');
+            const isFirsts = board.type === 'firsts';
+            document.getElementById('boardFilters').classList.toggle('hidden', isFirsts);
+            document.getElementById('modeGroup').classList.toggle('opacity-40', board.type === 'runs');
+            ['solo', 'party'].forEach(m => document.getElementById(`mode-${m}`).classList.toggle('active', board.mode === m));
+            ['alltime', 'weekly'].forEach(p => document.getElementById(`period-${p}`).classList.toggle('active', board.period === p));
+
+            const headers = {
+                best: ['Player', 'Lair', 'Clear Time'],
+                clears: ['Player', 'Lair', 'Clears'],
+                runs: ['Party', 'Lair', 'Clear Time'],
+                firsts: ['Slayers', 'Boss', 'First Kill'],
+            }[board.type];
+            if (board.mode === 'party' && board.type !== 'firsts') headers[0] = 'Party';
+            ['th-col2', 'th-col3', 'th-col4'].forEach((id, i) => { document.getElementById(id).textContent = headers[i]; });
+            footer.textContent = '';
+
+            if (boardData.error || !boardData.index) {
+                body.innerHTML = emptyRow(boardData.index === null && !boardData.error
+                    ? 'Loading the boards...'
+                    : 'The boards open with the public beta. Until then the lairs are being tested, and test runs never count.');
+                return;
+            }
+
+            if (isFirsts) {
+                const firsts = boardData.firsts;
+                if (!firsts) { body.innerHTML = emptyRow('Loading world firsts...'); return; }
+                if (firsts.error || !firsts.bosses?.length) { body.innerHTML = emptyRow('No world-first bosses have been announced yet.'); return; }
+                body.innerHTML = firsts.bosses.map((b, i) => `
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="py-4 px-6 text-amber-gold font-bold">${escapeHtml(b.category || '')}</td>
+                        <td class="py-4 px-6 text-white">${b.claimed ? namesOf(b.members) : '<span class="text-slate-500">Unclaimed</span>'}</td>
+                        <td class="py-4 px-6 text-slate-400">${escapeHtml(b.name)}</td>
+                        <td class="py-4 px-6 text-right text-emerald-400 font-bold">${b.claimed ? formatDate(b.killed_at) : '&mdash;'}</td>
+                    </tr>`).join('');
+                footer.textContent = `Updated ${formatDate(firsts.generated_at)}`;
+                return;
+            }
+
+            if (!board.dungeon) { body.innerHTML = emptyRow('No lairs have recorded runs yet.'); return; }
+            const doc = boardData.dungeons[board.dungeon];
+            if (!doc) { body.innerHTML = emptyRow('Loading...'); return; }
+            if (doc.error) { body.innerHTML = emptyRow('This lair\'s board could not be loaded.'); return; }
+
+            const entries = doc.boards?.[board.mode]?.[board.type]?.[board.period] || [];
+            const lairName = escapeHtml(doc.dungeon?.name || board.dungeon);
+            const totals = doc.totals?.[board.mode]?.[board.period];
+            if (totals) footer.textContent = `${totals.clears} clears and ${totals.fails} failed runs ${board.period === 'weekly' ? 'this week' : 'all-time'} · updated ${formatDate(doc.generated_at)}`;
+
+            if (!entries.length) { body.innerHTML = emptyRow('No counted runs on this board yet. Be the first.'); return; }
+            const isTime = board.type === 'best' || board.type === 'runs';
+            body.innerHTML = entries.map(e => `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="py-4 px-6 text-amber-gold font-bold">#${e.rank}</td>
+                    <td class="py-4 px-6 text-white">${namesOf(e.members)}</td>
+                    <td class="py-4 px-6 text-slate-400">${lairName}</td>
+                    <td class="py-4 px-6 text-right text-emerald-400 font-bold">${isTime ? formatTime(e.value) : escapeHtml(e.value)}</td>
+                </tr>`).join('');
+        }
+
+        // --- DEVLOGS (newest first) ---
+        const DEVLOGS = [
+            {
+                id: 6, cat: 'dungeon', label: 'Lairs', date: 'October 2026', accent: 'emerald',
+                title: 'Devlog #6: Leaderboards & World Firsts',
+                summary: 'Every counted run now lands on server boards: best times, clears, failures and the fastest parties.',
+                text: `<p class="mb-3">Each lair keeps its own boards: best times, clears, failed runs and a fastest-parties board. Solo runs and party runs (two or more players) are ranked apart, both all-time and weekly. Staff test runs never count.</p>
+                       <p class="mb-3">Boards can be placed in the world as floating text with a podium of the top five players wearing their own skins. World firsts record the first group to kill each listed boss, once and forever, and announce it to the server.</p>
+                       <p>The same data is exported for this website, which is where the leaderboard section above reads from.</p>`,
+            },
+            {
+                id: 5, cat: 'dungeon', label: 'Lairs', date: 'October 2026', accent: 'ember',
+                title: 'Devlog #5: Every Party Gets Its Own Lair',
+                summary: 'Lairs are copied fresh for each party, with ordered minibosses, sealed gates and a portal home.',
+                text: `<p class="mb-3">When a party descends, the server copies the lair just for them, so nobody waits for another group and nothing carries over between runs. The copy is cleaned up when the run ends.</p>
+                       <p class="mb-3">Minibosses must fall in order. Each one breaks a seal: walls of old stonework that crack open with particles and sound, revealing the way deeper. Every stage has its own title and message.</p>
+                       <p>When the boss dies, a portal rises. Touch it and you return exactly where you stood before descending.</p>`,
+            },
+            {
+                id: 4, cat: 'combat', label: 'Combat & Gear', date: 'October 2026', accent: 'soul',
+                title: 'Devlog #4: Gems & Sockets',
+                summary: 'Typed sockets for ability and attribute gems, removable without losing them.',
+                text: `<p class="mb-3">Gems are full items: they carry stats and skills of their own. Sockets are typed. An ability gem grants a skill and can sit only once on an item; attribute gems can stack.</p>
+                       <p class="mb-3">Each item comes with a set number of sockets, and an NPC can add more up to that item's limit. Gems can be taken out with a removal item, where you pick the socket in a menu, or by an NPC; the gem always comes back to you.</p>
+                       <p>Stat lines show the item's own value with your gem bonus beside it, like <span class="font-mono text-amber-gold">+10 (+5)</span>.</p>`,
+            },
+            {
+                id: 3, cat: 'social', label: 'Social', date: 'October 2026', accent: 'gold',
+                title: 'Devlog #3: Guilds',
+                summary: 'Tags, three ranks, up to 30 members, guild chat, and an oath that guildmates never harm each other.',
+                text: `<p class="mb-3">Guilds have a 2 to 6 character tag, three ranks and room for 30 members. Guild chat runs through the same moderation as every other channel.</p>
+                       <p>Guildmates are sworn to each other: their damage and debuff skills can never hit one another, even inside a party with friendly fire on, while buffs still land. Guilds have been played in-game and work.</p>`,
+            },
+            {
+                id: 2, cat: 'combat', label: 'Combat & Gear', date: 'October 2026', accent: 'gold',
+                title: 'Devlog #2: Skills Are the Weapon',
+                summary: 'Plain swings are off. Every weapon hit is a skill, and every skill knows whether it harms or helps.',
+                text: `<p class="mb-3">Vanilla melee is disabled on every weapon. All hits come from skills cast by the item's abilities, so on-hit effects fire from those skill hits.</p>
+                       <p class="mb-3">Each skill is tagged as damage, buff or debuff, which decides who it can touch: party members can be caught by damage, guildmates never are.</p>
+                       <p>Mobs fight on the same rules, with defense, dodge, accuracy and critical stats that scale with their level.</p>`,
+            },
+            {
+                id: 1, cat: 'tech', label: 'Tech', date: 'October 2026', accent: 'gold',
+                title: 'Devlog #1: One Profile for Every System',
+                summary: 'A single, safe store for player data that every Vaelithra plugin shares.',
+                text: `<p class="mb-3">Levels, guild membership, auras, menu choices and dungeon records all live in one player profile instead of being scattered across files.</p>
+                       <p>Profiles load and save away from the main server thread and autosave every five minutes. If the database is unavailable, joining is refused rather than risking a blank character overwriting your progress.</p>`,
+            },
+        ];
+
+        const ACCENTS = {
+            gold: { grad: 'from-amber-gold/20', badge: 'bg-amber-gold/20 text-amber-soft border-amber-gold/30', link: 'text-amber-gold' },
+            ember: { grad: 'from-ember/25', badge: 'bg-ember/20 text-orange-300 border-ember/40', link: 'text-orange-300' },
+            soul: { grad: 'from-soul/20', badge: 'bg-soul/15 text-soul border-soul/30', link: 'text-soul' },
+            emerald: { grad: 'from-emerald-500/20', badge: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30', link: 'text-emerald-300' },
         };
+
+        function renderDevlogs() {
+            document.getElementById('devlogGrid').innerHTML = DEVLOGS.map(log => {
+                const a = ACCENTS[log.accent];
+                return `
+                <article class="devlog-card glass-panel glass-panel-hover rounded-2xl overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-gold" data-category="${log.cat}" tabindex="0" onclick="openDevlogModal(${log.id})" onkeydown="if(event.key==='Enter')openDevlogModal(${log.id})">
+                    <div class="h-28 bg-gradient-to-br ${a.grad} via-void-800 to-void-900 p-6 flex flex-col justify-between">
+                        <span class="px-2.5 py-1 rounded ${a.badge} text-[10px] font-mono font-bold tracking-wider uppercase border w-fit">${log.label}</span>
+                        <div class="text-[11px] font-mono text-slate-400">${log.date}</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-cinzel text-lg font-bold text-white mb-2">${log.title}</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed line-clamp-3">${log.summary}</p>
+                        <div class="mt-4 flex items-center text-xs font-mono ${a.link} space-x-1">
+                            <span>Read Briefing</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </div>
+                    </div>
+                </article>`;
+            }).join('');
+        }
+
+        function filterDevlogs(cat, button) {
+            document.querySelectorAll('.dev-filter-btn').forEach(b => b.classList.toggle('active', b === button));
+            document.querySelectorAll('.devlog-card').forEach(card => {
+                card.style.display = (cat === 'all' || card.dataset.category === cat) ? 'block' : 'none';
+            });
+        }
 
         function openDevlogModal(id) {
-            const data = devlogDetails[id];
-            if (!data) return;
+            const log = DEVLOGS.find(d => d.id === id);
+            if (!log) return;
+            const a = ACCENTS[log.accent];
             document.getElementById('devlogModalContent').innerHTML = `
-                <span class="px-2.5 py-1 rounded bg-amber-gold/20 text-amber-soft text-[10px] font-mono font-bold uppercase border border-amber-gold/30">${data.cat}</span>
-                <div class="text-xs font-mono text-slate-500 mt-2">${data.date}</div>
-                <h2 class="font-cinzel text-xl font-bold text-white my-3">${data.title}</h2>
-                <div class="text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-white/10 pt-4 font-sans">${data.text}</div>
-            `;
+                <span class="px-2.5 py-1 rounded ${a.badge} text-[10px] font-mono font-bold uppercase border">${log.label}</span>
+                <div class="text-xs font-mono text-slate-500 mt-2">${log.date}</div>
+                <h2 class="font-cinzel text-xl font-bold text-white my-3">${log.title}</h2>
+                <div class="text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-white/10 pt-4 font-sans">${log.text}</div>`;
             document.getElementById('devlogModal').classList.remove('hidden');
         }
 
         function closeDevlogModal() {
             document.getElementById('devlogModal').classList.add('hidden');
         }
+
+        document.getElementById('devlogModal').addEventListener('click', e => {
+            if (e.target.id === 'devlogModal') closeDevlogModal();
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeDevlogModal();
+        });
+
+        // --- Boot ---
+        renderDevlogs();
+        renderBoard();
+        loadLeaderboards();
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            if (!reduceMotion) animateParticles();
+        });
     </script>
 </body>
 </html>
